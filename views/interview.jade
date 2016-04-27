@@ -1,0 +1,11 @@
+include includes/head
+		title Заполнение формы | SuperForms
+		link(rel="stylesheet", href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css")
+	body
+		div#root.container
+		script#info(type="application/json").
+			{
+				"getUrl": "/api/forms/#{id}",
+				"postUrl": "/api/answers/#{id}"
+			}
+		script(type="text/javascript", src="/scripts/interview.js")

@@ -1,34 +1,21 @@
-var mongoose = require('../lib/mongoose');
-var Schema = mongoose.Schema;
+var config = require('../config');
+var db = require('./db.js')
+var Hashids = require("hashids");
+hashids = new Hashids(config.get("hashids:formSalt"), 16);
 
 
-var formSchema = new Schema({
-  formTitle: {
-    type: String,
-    required: true
-  },
-  formDescription: {
-    type: String,
-    required: true
-  },
-  questions: [
-    {
-      questionTitle: String,
-      questionDescription: String,
-      questionType: String,
-      options: [ String ],
-      required: String
-    }
-  ],
-  date: { type: Date, default: Date.now }
-});
-
-
-formSchema.methods.getQuestions = function () {
-  this.questions.forEach(function (question) {
-    console.log(question);
-  })
+exports.find = function (id) {
+  return db.query('SELECT * FROM forms WHERE id = $1', [id]);
 }
 
+exports.add = function (user, form) {
+  return db.query("INSERT INTO forms(user_id, form) values($1, $2) RETURNING id", [user, form]);
+}
 
-exports.Form = mongoose.model('Form', formSchema);
+exports.encode = function (pgId) {
+  return hashids.encode(pgId);
+}
+
+exports.decode = function (id) {
+  return +hashids.decode(id);
+}

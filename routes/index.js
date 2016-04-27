@@ -1,51 +1,27 @@
 var fs = require('fs');
 var path = require('path');
-var forms = require('../db/forms.js')
-
+var db = require('../models/db.js');
+var forms = require('../models/form.js');
+var checkAuth = require('../middleware/checkAuth');
+var forms = require('./forms.js');
 
 module.exports = function (app) {
+  app.get('/', require('./main.js').get);
 
-  app.get('/', function (req, res) {
-    res.render('generator');
-  });
+  app.get('/signin', require('./signIn.js').get);
+  app.post('/signin', require('./signIn.js').post);
 
-  app.get('/form', function (req, res) {
-    res.render('form');
-  });
+  app.get('/signout', require('./signOut.js').get);
 
-  app.get('/api/comments', function(req, res) {
-    forms.get()
-      .then(res.json)
+  app.get('/signup', require('./signUp.js').get);
+  app.post('/signup', require('./signUp.js').post);
 
-    // fs.readFile(COMMENTS_FILE, function(err, data) {
-    //   if (err) {
-    //     console.error(err);
-    //     process.exit(1);
-    //   }
-    //   res.json(JSON.parse(data));
-    // });
-  });
+  app.get('/create', checkAuth, forms.create);
+  app.post('/api/forms', checkAuth, forms.save);//save form's pattern
 
-  app.post('/api/comments', function(req, res) {
-    console.log(req.body);
-    forms.add(req.body);
-    // fs.readFile(COMMENTS_FILE, function(err, data) {
-    //   if (err) {
-    //     console.error(err);
-    //     process.exit(1);
-    //   }
-    //   var comments = JSON.parse(data);
-      
-    //   var newComment = req.body;
-    //   comments.push(newComment);
-    //   fs.writeFile(COMMENTS_FILE, JSON.stringify(comments, null, 4), function(err) {
-    //     if (err) {
-    //       console.error(err);
-    //       process.exit(1);
-    //     }
-    //     // res.json(comments);
-    //     res.redirect('/form');
-    //   });
-    // });
-  });
+  app.get('/forms/:id', forms.getInterview);//get 'interview' page
+  app.get('/api/forms/:id', forms.showInterview);//get form's pattern in JSON 
+
+  app.post('/api/answers/:id', require('./responses.js').saveInterview);
+
 }
