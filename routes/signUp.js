@@ -5,7 +5,8 @@ var HttpError = require('../error').HttpError;
 
 exports.get = function (req, res, next) {
 	if(req.user) {
-		next(404, 'You have already logined');
+		res.redirect('/');
+		// next(new HttpError(401, "Вы уже авторизованы"));
 		return;
 	}
 	res.render('signUp');

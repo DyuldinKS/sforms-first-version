@@ -1,4 +1,5 @@
 var users = require('../models/user');
+var forms = require('../models/form');
 var HttpError = require('../error').HttpError;
 
 
@@ -16,6 +17,7 @@ exports.post = function (req, res, next) {
 
 	users.findByMail(user.email)
 		.then(function (result) {
+
 			if(result && users.compare(user.password, result.password)) {
 				req.session.user = users.encode(result.id);
 				res.sendStatus(200);
