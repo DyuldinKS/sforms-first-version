@@ -16,7 +16,8 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+app.use(bodyParser.text());
 app.use(bodyParser.urlencoded({extended: true}));
 
 
@@ -41,7 +42,7 @@ require(__dirname + '/routes')(app);
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use(function (err, req, res, send) {
-  console.log('ErrorHandler: ', err);
+  console.log('ErrorHandler: ', err.stack);
   if(typeof(err) === 'number') {
     err = new HttpError(err);
   } 

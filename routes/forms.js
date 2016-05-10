@@ -9,26 +9,27 @@ exports.sendGeneratorPage = function (req, res) {
 	res.render('generation');
 };
 
+exports.sendEditPage = function(req, res, next) {
+	res.render('generation', { id: req.form.id });
+}
 
-exports.sendFormPage = function(req, res, next) {
+exports.sendPreviewPage = function(req, res, next) {
+	res.render('preview', { id: req.form.id });
+}
+
+
+exports.sendInterviewPage = function(req, res, next) {
 	var id = forms.decode(req.params.id);
-
 	forms.findOne(id)
 		.then(result => {
 			if(result) {
-				if(req.user) {
-					if(req.user.id === result.user_id) {
-						res.render('message', { text: 'Вы являетесь создателем этой формы. Для вас здесь будет другая страница.'});
-						return;		
-					}
-				}
-				res.render('interview', { id: req.params.id });
+				res.render('interview', { id: forms.encode(result.id) });
 			} else {
 				next(new HttpError(404, 'Данная форма не найдена.'));
 			}
 		})
 		['catch'](next);
-		
+	
 }
 
 
@@ -43,12 +44,28 @@ exports.save = function(req, res, next) {
 };
 
 
+// var updatedFields = {
+// 		form : { 'title' : 'SuperForm'},
+// 		edited : true,
+// 		sent : true
+// 		// status : 'dited'
+// 	} 
+// 	// updatedFields.edited = true;
+
+// forms.update(34, updatedFields);
+
+
 exports.update = function(req, res, next) {
-	var id = forms.decode(req.params.id);
-	newForm = req.body;
+	var id = req.form.id;
+	var updatedFields = {
+		form : req.body
+	} 
 	// Если форма сохраняется в процессе создания, то дата изменения не записывается в базу
-	var edited = ( req.headers.referer !== config.get('domain') + 'forms/new' );
-	forms.update(id, newForm, edited)
+	if ( req.headers.referer !== config.get('domain') + 'forms/new' ) {
+		updatedFields.edited = 'current_timestamp';
+	}
+	
+	forms.update(id, updatedFields)
 		.then(result => {
 			res.sendStatus(200);
 		})
@@ -57,19 +74,12 @@ exports.update = function(req, res, next) {
 
 
 exports.copy = function(req, res, next) {
-	var id = forms.decode(req.body.id);
-	var newName = req.body.name;
+	var id = req.form.id;
+	var newName = JSON.parse(req.body).name;
 
-	forms.findOne(id)
-		.then(result => {
-			if(result) {
-				var newForm = result.form;
-				newForm.name = newName;
-				return forms.add(req.user.id, newForm);
-			} else {
-				res.sendStatus(404);
-			}
-		})
+	var newForm = req.form.form;
+	newForm.name = newName;
+	forms.add(req.user.id, newForm)
 		.then(result => {
 			if(result) {
 				res.send( forms.encode(result.id) );
@@ -80,7 +90,7 @@ exports.copy = function(req, res, next) {
 
 
 exports.delete = function(req, res, next) {
-	var id = forms.decode(req.params.id);
+	var id = req.form.id;
 
 	forms.delete(id)
 		.then(result => {
@@ -94,6 +104,26 @@ exports.delete = function(req, res, next) {
 			res.sendStatus(200);
 		})
 		['catch'](next);
+}
+
+
+exports.send = function(req, res, next) {
+	var id = req.form.id;
+	var updatedFields = {
+		sent : true
+	} 
+	if(req.body) {
+		// отправка почтой
+	}
+
+	// изменение статуса
+	forms.update(id, updatedFields)
+		.then(result => {
+			res.sendStatus(200);
+		})
+		['catch'](next);
+
+
 }
 
 
@@ -117,7 +147,7 @@ exports.getAll = function(req, res, next) {
 		.then(result => {
 			if(result) {
 				var formsList = result.map(formRow => {
-					return new ModifiedFormObject(formRow);
+					return new ModifiedForm(formRow);
 				})
 				res.json(formsList);
 			} else {

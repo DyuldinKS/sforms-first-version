@@ -2,7 +2,7 @@
 	"port" : 3000,
 	"domain" : "http://localhost:3000/",
 	"pg" : {
-		"url" : "postgres://hellmaker:justdoit@localhost:5432/superforms",
+		"url" : "postgres://username:password@localhost:5432/database_name",
 		"poolIdleTimeout" : 10000
 	},
 	"session" : {
@@ -10,7 +10,7 @@
 		"cookie": {
 			"path" : "/",
 			"httpOnly" : true,
-			"maxAge" : 604800000
+			"maxAge" : null
 		}
 	},
 	"hashids" : {

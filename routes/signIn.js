@@ -13,7 +13,7 @@ exports.get = function (req, res) {
 
 
 exports.post = function (req, res, next) {
-	var user = req.body;
+	var user = JSON.parse(req.body);
 
 	users.findByMail(user.email)
 		.then(function (result) {

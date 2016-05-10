@@ -1,0 +1,20 @@
+include includes/head
+		title Главная | SuperForms
+		link(rel="stylesheet", href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css")
+		link(rel="stylesheet", href="styles/react-bootstrap-table-all.min.css")
+		link(rel="stylesheet", href="/styles/react-widgets.css")
+	body
+		div#root.container
+		script#info(type="application/json").
+			{
+				"getUrl": "/api/forms",
+				"postUrl": "/api/answers/",
+				"copyUrl": "/api/forms/id/copy",
+				"previewUrl": "/forms/id/preview",
+				"deleteUrl": "/api/forms/id",
+				"editUrl": "/forms/id/edit",
+				"reportUrl": "/forms/id/newreport",
+				"sendUrl": "/api/forms/id/send",
+				"statusUrl": "/api/forms/id/status"
+			}
+		script(type="text/javascript", src="/scripts/main.js")

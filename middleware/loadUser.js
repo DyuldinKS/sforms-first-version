@@ -3,7 +3,7 @@ var HttpError = require('../error').HttpError;
 
 module.exports = function(req, res, next) {
 	
-  req.user = res.locals.user = null;
+  req.user = null;
 
   if (!req.session.user) return next();
   var id = users.decode(req.session.user);
@@ -11,7 +11,7 @@ module.exports = function(req, res, next) {
   users.findById(id)
 		.then(function (result) {
 			if(result) {
-				req.user = res.locals.user = result;
+				req.user = result;
 				return next();
 			}
 			

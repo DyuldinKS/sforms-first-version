@@ -16,19 +16,28 @@ exports.add = function (user, form) {
   return db.query("INSERT INTO forms(user_id, form) values($1, $2) RETURNING id;", [user, form]);
 }
 
-exports.update = function (id, newForm, edited) {
-	var queryString = (edited) ?
-		"UPDATE forms SET form = $1, edited = current_timestamp WHERE id = $2;" :
-		"UPDATE forms SET form = $1 WHERE id = $2;";
+exports.update = function (id, updatedFields) {
+	var count = 0;
+	var values = [];
+	var queryString = 'UPDATE forms SET ';
+	var keys = Object.keys(updatedFields);
 
-	return db.query(queryString, [newForm, id]);
+	Object.keys(updatedFields).forEach( (key) => {
+		if(key === 'edited' || key === 'sent') {
+			queryString = queryString + key + ' = current_timestamp, ';
+		} else {
+			queryString = queryString + key + ' = $' + ++count + ', ';
+			values.push(updatedFields[key]);
+		}
+	})
+	queryString = queryString.slice(0, -2) + ' WHERE id = $' + ++count + ';';
+	values.push(id);
+
+	return db.query(queryString, values);
 }
 
-// exports.updateNew = function (id) {
-// 	return db.query("UPDATE forms SET form = $1 WHERE id = $2;", [newForm, id]);
-// }
-
 exports.delete = function (id) {
+	console.log('delete!');
   return db.query("DELETE FROM forms WHERE id = $1;", [id]);
 }
 
