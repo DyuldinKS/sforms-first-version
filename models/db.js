@@ -14,7 +14,7 @@ function query(queryString, data, allRows) {
 			if(err) { reject(err); }
 
 			// show connection pool
-			// console.log('all: ', pg.pools.all['"postgres://hellmaker:justdoit@localhost:5432/superforms"'].getPoolSize());
+			console.log('all: ', pg.pools.all['"postgres://hellmaker:justdoit@localhost:5432/superforms"'].getPoolSize());
 
 	    client.query(queryString, data, (err, result) => {
 	    	done();  

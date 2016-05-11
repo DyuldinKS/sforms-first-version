@@ -2,19 +2,26 @@ var config = require('../config');
 var forms = require('../models/form');
 var HttpError = require('../error').HttpError;
 
-var path = require('path');
 
 
 exports.sendGeneratorPage = function (req, res) {
-	res.render('generation');
+	res.render('generation|edit', { 
+		title: 'Создание формы',
+		type: 'CREATE_FORM',
+		postUrl: '/api/forms'
+	});
 };
 
 exports.sendEditPage = function(req, res, next) {
-	res.render('generation', { id: req.form.id });
+	res.render('generation|edit', { 
+		title: 'Редактирование формы',
+		type: 'EDIT_FORM',
+		postUrl: '/api/forms/' + req.params.id + '/update'
+	});
 }
 
 exports.sendPreviewPage = function(req, res, next) {
-	res.render('preview', { id: req.form.id });
+	res.render('preview', { id: req.params.id });
 }
 
 
@@ -23,7 +30,7 @@ exports.sendInterviewPage = function(req, res, next) {
 	forms.findOne(id)
 		.then(result => {
 			if(result) {
-				res.render('interview', { id: forms.encode(result.id) });
+				res.render('interview', { id: req.params.id });
 			} else {
 				next(new HttpError(404, 'Данная форма не найдена.'));
 			}
@@ -34,13 +41,16 @@ exports.sendInterviewPage = function(req, res, next) {
 
 
 exports.save = function(req, res, next) {
-  forms.add(req.user.id, req.body)
+	if(!req.params.id) {
+		forms.add(req.user.id, req.body)
     .then(result => {
     	var link = config.get('domain') + 'forms/' + forms.encode(result.id);
     	console.log(link);
       res.send(link);
     })
     ['catch'](next);
+	}
+  
 };
 
 
@@ -75,7 +85,7 @@ exports.update = function(req, res, next) {
 
 exports.copy = function(req, res, next) {
 	var id = req.form.id;
-	var newName = JSON.parse(req.body).name;
+	var newName = (JSON.parse(req.body)).name;
 
 	var newForm = req.form.form;
 	newForm.name = newName;
@@ -113,6 +123,9 @@ exports.send = function(req, res, next) {
 		sent : true
 	} 
 	if(req.body) {
+		
+
+
 		// отправка почтой
 	}
 
@@ -169,3 +182,6 @@ function ModifiedForm(formRow) {
 	this.edited = formRow.edited;
 	this.sent = formRow.sent;
 }
+
+
+

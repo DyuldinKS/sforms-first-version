@@ -6,6 +6,7 @@ include includes/head
     div#root.container
     script#info(type="application/json").
       {
-        "getUrl": "/api/forms/#{id}/responses"
+        "getUrl": "/api/forms/#{id}/responses",
+        "postUrl": "/api/forms/#{id}/reports"
       }
     script(type="text/javascript", src="/scripts/report.js")

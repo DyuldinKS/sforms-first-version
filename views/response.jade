@@ -1,13 +1,13 @@
 include includes/head
-		title Заполнение формы | SuperForms
+		title Просмотр ответа| SuperForms
 		link(rel="stylesheet", href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css")
 		link(rel="stylesheet", href="/styles/react-widgets.css")
 	body
 		div#root.container
 		script#info(type="application/json").
 			{
-				"type": "INTERVIEW_FORM",
+				"type": "ANSWER_FORM",
 				"getUrl": "/api/forms/#{id}",
-				"postUrl": "/api/forms/#{id}/responses"
+				"responseUrl": "api/forms/#{id}/responses/#{response_id}"
 			}
 		script(type="text/javascript", src="/scripts/interview.js")

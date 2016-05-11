@@ -54,6 +54,10 @@ exports.getOne = function(req, res, next) {
 	console.log('responses.getOne');
 }
 
+exports.sendResponsePage = function(req, res, next) {
+	res.render('response', { id: req.form.id, response_id: req.params.response_id });
+}
+
 
 // responses.find(5)
 // 	.then(function (result) {

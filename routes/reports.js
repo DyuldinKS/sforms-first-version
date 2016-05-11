@@ -27,3 +27,7 @@ exports.sendNewReportPage = function(req, res, next) {
 exports.getAllByForm = function (req, res, next) {
 	console.log('reports.getAllByForm');
 }
+
+exports.save = function (req, res, next) {
+	console.log('reports.getAllByForm');
+}
