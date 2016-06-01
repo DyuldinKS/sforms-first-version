@@ -2,18 +2,35 @@
 	"port" : 3000,
 	"domain" : "http://localhost:3000/",
 	"pg" : {
-		"url" : "postgres://username:password@localhost:5432/database_name",
-		"poolIdleTimeout" : 10000
+		"url" : "postgres://username:password@localhost:5432/db_name",
+		"poolIdleTimeout" : 30000
 	},
 	"session" : {
-		"secret" : "myLittleSecret",
+		"secret" : "forCookieSign",
 		"cookie": {
 			"path" : "/",
 			"httpOnly" : true,
 			"maxAge" : null
-		}
+		},
+		"resave" : false,
+		"saveUninitialized" : false
 	},
-	"hashids" : {
-		"salt" : "my superSalt"
+	"hash" : {
+		"user" : {
+			"salt" : "forAlphabetRandomShuffle",
+			"length" : 8
+		},
+		"form" : {
+			"salt" : "forRandomShuffleToo",
+			"length" : 12
+		},
+		"response" : {
+			"salt" : "nextShuffle",
+			"length" : 6
+		},
+		"report" : {
+			"salt" : "oneMoreShuffle",
+			"length" : 10
+		}
 	}
 }

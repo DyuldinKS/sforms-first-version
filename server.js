@@ -16,10 +16,10 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 
+app.use(require('./middleware/sendHttpError'));
 // app.use(bodyParser.json());
 app.use(bodyParser.text());
 app.use(bodyParser.urlencoded({extended: true}));
-
 
 app.use(cookieParser());
 
@@ -31,11 +31,13 @@ app.use(session({
   }),
   secret: config.get('session:secret'),
   resave: config.get('session:resave'),
-  cookie: config.get('session:cookie')
+  cookie: config.get('session:cookie'),
+  saveUninitialized : config.get('session:saveUninitialized')
 }));
 
-app.use(require('./middleware/sendHttpError'));
-app.use(require('./middleware/loadUser'));
+
+// app.use(require('./middleware/loadUser'));
+// app.use(require('./middleware/loadData'));
 
 require(__dirname + '/routes')(app);
 
@@ -55,9 +57,6 @@ app.use(function (err, req, res, send) {
 })
 
 
-
-app.set('port', config.get('port'));
-
-app.listen(app.get('port'), function () {
+app.listen(config.get('port'), function () {
   console.log('Express server is listening on port ' + config.get('port'));
 });

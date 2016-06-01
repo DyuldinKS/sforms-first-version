@@ -5,18 +5,19 @@ var HttpError = require('../error').HttpError;
 
 
 exports.sendGeneratorPage = function (req, res) {
-	res.render('generation|edit', { 
+	res.render('generation&edit', { 
 		title: 'Создание формы',
+		page: 'Главная',
 		type: 'CREATE_FORM',
-		postUrl: '/api/forms'
+		id: 'id'
 	});
 };
 
 exports.sendEditPage = function(req, res, next) {
-	res.render('generation|edit', { 
+	res.render('generation&edit', { 
 		title: 'Редактирование формы',
 		type: 'EDIT_FORM',
-		postUrl: '/api/forms/' + req.params.id + '/update'
+		id: req.params.id
 	});
 }
 
@@ -26,7 +27,7 @@ exports.sendPreviewPage = function(req, res, next) {
 
 
 exports.sendInterviewPage = function(req, res, next) {
-	var id = forms.decode(req.params.id);
+	var id = forms.getID(req);
 	forms.findOne(id)
 		.then(result => {
 			if(result) {
@@ -41,36 +42,21 @@ exports.sendInterviewPage = function(req, res, next) {
 
 
 exports.save = function(req, res, next) {
-	if(!req.params.id) {
-		forms.add(req.user.id, req.body)
-    .then(result => {
-    	var link = config.get('domain') + 'forms/' + forms.encode(result.id);
-    	console.log(link);
-      res.send(link);
-    })
-    ['catch'](next);
-	}
-  
+	forms.add(req.user.id, req.body)
+	  .then(result => {
+	    res.send(forms.getHash(result.id));
+	  })
+  ['catch'](next);
 };
-
-
-// var updatedFields = {
-// 		form : { 'title' : 'SuperForm'},
-// 		edited : true,
-// 		sent : true
-// 		// status : 'dited'
-// 	} 
-// 	// updatedFields.edited = true;
-
-// forms.update(34, updatedFields);
 
 
 exports.update = function(req, res, next) {
 	var id = req.form.id;
 	var updatedFields = {
-		form : req.body
+		json : req.body
 	} 
 	// Если форма сохраняется в процессе создания, то дата изменения не записывается в базу
+	// Используется для возмодности сортировки по созданным / отредактированным / отправленным формам
 	if ( req.headers.referer !== config.get('domain') + 'forms/new' ) {
 		updatedFields.edited = 'current_timestamp';
 	}
@@ -87,12 +73,12 @@ exports.copy = function(req, res, next) {
 	var id = req.form.id;
 	var newName = (JSON.parse(req.body)).name;
 
-	var newForm = req.form.form;
+	var newForm = req.form.json;
 	newForm.name = newName;
 	forms.add(req.user.id, newForm)
 		.then(result => {
 			if(result) {
-				res.send( forms.encode(result.id) );
+				res.send( forms.getHash(result.id) );
 			}
 		})
 		['catch'](next);
@@ -123,35 +109,19 @@ exports.send = function(req, res, next) {
 		sent : true
 	} 
 	if(req.body) {
-		
-
-
 		// отправка почтой
 	}
-
 	// изменение статуса
 	forms.update(id, updatedFields)
 		.then(result => {
 			res.sendStatus(200);
 		})
 		['catch'](next);
-
-
 }
 
 
 exports.getOne = function(req, res, next) {
-	var id = forms.decode(req.params.id);
-
-	forms.findOne(id)
-		.then(result => {
-			if(result) {
-				res.json(result.form);
-			} else {
-				res.sendStatus(404);
-			}
-		})
-		['catch'](next);
+	res.json(forms.jsonForClient(req.form, true));
 }
 
 
@@ -159,9 +129,7 @@ exports.getAll = function(req, res, next) {
 	forms.findAll(req.user.id)
 		.then(result => {
 			if(result) {
-				var formsList = result.map(formRow => {
-					return new ModifiedForm(formRow);
-				})
+				var formsList = result.map(forms.jsonForClient);
 				res.json(formsList);
 			} else {
 				next(new HttpError(404, 'Данная форма не найдена.'));
@@ -169,19 +137,5 @@ exports.getAll = function(req, res, next) {
 		})
 		['catch'](next);
 }
-
-
-// Создание объекта формы из строки таблицы 'forms'
-// для отправки списка всех форм
-function ModifiedForm(formRow) {
-	this.id = forms.encode(formRow.id);
-	this.name = formRow.form.name;
-	this.description = formRow.form.description;
-	this.type = formRow.form.type;
-	this.created = formRow.created;
-	this.edited = formRow.edited;
-	this.sent = formRow.sent;
-}
-
 
 

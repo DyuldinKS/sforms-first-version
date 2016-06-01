@@ -8,15 +8,18 @@ pg.defaults.poolIdleTimeout = config.get('pg:poolIdleTimeout');
 
 
 function query(queryString, data, allRows) {
+	// show query to db
+	// console.log('NEW QUERY : ' + queryString)
 	return new Promise((resolve, reject) => {
 
 		pg.connect(connectionString, (err, client, done) => {
 			if(err) { reject(err); }
 
 			// show connection pool
-			console.log('all: ', pg.pools.all['"postgres://hellmaker:justdoit@localhost:5432/superforms"'].getPoolSize());
+			// console.log('all: ', pg.pools.all['"postgres://hellmaker:justdoit@localhost:5432/superforms"'].getPoolSize());
 
 	    client.query(queryString, data, (err, result) => {
+	    	// console.log(result.rows[0]);
 	    	done();  
         (err) ? reject(err) : resolve( (allRows) ? result.rows : result.rows[0] );
       });
@@ -29,27 +32,35 @@ function query(queryString, data, allRows) {
 query('\
 	CREATE TABLE IF NOT EXISTS users(\
 		id SERIAL PRIMARY KEY,\
-		email VARCHAR(50),\
+		email VARCHAR(60) UNIQUE,\
 		password VARCHAR(60),\
 		registered TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,\
 		status VARCHAR(10)\
 	);\
 	CREATE TABLE IF NOT EXISTS forms(\
 		id SERIAL PRIMARY KEY,\
-		user_id SERIAL REFERENCES users,\
-		form JSON,\
+		user_id SERIAL REFERENCES users ON DELETE CASCADE,\
+		json JSON NOT NULL,\
 		recipients JSON,\
 		created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,\
 		edited TIMESTAMP WITH TIME ZONE,\
-		sent TIMESTAMP WITH TIME ZONE\
+		sent TIMESTAMP WITH TIME ZONE,\
+		expires TIMESTAMP WITH TIME ZONE\
 	);\
 	CREATE TABLE IF NOT EXISTS responses(\
 		id SERIAL PRIMARY KEY,\
-		author VARCHAR(50),\
-		answers JSON,\
-		form_id SERIAL REFERENCES forms,\
+		user_id SERIAL REFERENCES users ON DELETE CASCADE,\
+		form_id SERIAL REFERENCES forms ON DELETE CASCADE,\
+		json JSON NOT NULL,\
+		received TIMESTAMP(6) WITH TIME ZONE DEFAULT current_timestamp\
+	);\
+	CREATE TABLE IF NOT EXISTS reports(\
+		id SERIAL PRIMARY KEY,\
+		form_id SERIAL REFERENCES forms ON DELETE CASCADE,\
+		json JSON NOT NULL,\
 		created TIMESTAMP(6) WITH TIME ZONE DEFAULT current_timestamp\
 	);'
+
 );
 
 
@@ -60,7 +71,7 @@ query('SELECT * FROM sessions;')
 		query('\
 			CREATE TABLE IF NOT EXISTS "sessions" (\
 		  	"sid" varchar NOT NULL COLLATE "default",\
-				"sess" json NOT NULL,\
+				"sess" JSON NOT NULL,\
 				"expire" TIMESTAMP(6) NOT NULL\
 			) WITH (OIDS=FALSE);\
 			ALTER TABLE "sessions" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;'

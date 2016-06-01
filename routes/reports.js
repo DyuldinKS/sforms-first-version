@@ -2,26 +2,8 @@ var forms = require('../models/form');
 var responses = require('../models/response');
 var reports = require('../models/report');
 var HttpError = require('../error').HttpError;
-var json2xls = require('json2xls');
+var json2csv = require('../lib/json2csv');
 
-exports.sendNewReportPage = function(req, res, next) {
-	var id = forms.decode(req.params.id);
-
-	forms.findOne(id)
-		.then(function (result) {
-			if(result) {
-				res.render('report', { id: req.params.id });
-			} else {
-				next(new HttpError(404, 'Undefined form.'));
-			}
-		})
-		.then(function (result) {
-			if(result) {
-				res.sendStatus(200);
-			}
-		})
-		['catch'](next);
-};
 
 
 exports.getAllByForm = function (req, res, next) {
@@ -29,5 +11,34 @@ exports.getAllByForm = function (req, res, next) {
 }
 
 exports.save = function (req, res, next) {
-	console.log('reports.getAllByForm');
+
+	var order = (JSON.parse(req.body)).columns;
+	var report = [];
+	responses.findAll(req.form.id)
+		.then(result => {
+			if(result) {
+				var mainTable = report.length;
+				report.push({ name : 'Отчёт', head : [], body : []})
+
+				order.forEach(field => {
+					var newField = reports.calculateField(result, field);
+					if(typeof newField === 'object') {
+						report.push(newField);
+					} else {
+						report[mainTable].head.push(field.newTitle);
+						report[mainTable].body.push(reports.calculateField(result, field));
+					}
+				})
+
+				return reports.add(JSON.stringify(report), req.form.id);
+			}
+		})
+
+		.then(result => {
+			if(result) {
+				res.send(json2csv.export(report));
+			}
+		})
+		['catch'](next);
 }
+

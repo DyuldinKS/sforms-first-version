@@ -1,48 +1,83 @@
 var forms = require('../models/form');
 var responses = require('../models/response');
 var HttpError = require('../error').HttpError;
-
+var json2csv = require('../lib/json2csv');
 
 var path = require('path');
 
 exports.save = function(req, res, next) {
-	var id = forms.decode(req.params.id);
 	var interview = req.body;
-
-	forms.findOne(id)
-		.then(function (result) {
+	responses.add(interview, req.form.id)
+		.then(result => {
 			if(result) {
-				return responses.add(interview, result.id);
-			} else {
-				next(new HttpError(404, 'Undefined form.'));
-			}
-		})
-		.then(function (result) {
-			if(result) {
+				req.session.completedForms.push(req.params.id);
 				res.sendStatus(200);
 			}
 		})
 		['catch'](next);
+	
 };
 
 
-exports.getAll = function(req, res, next) {
-	var form_id = forms.decode(req.params.id);
-	var data = {};
-	forms.findOne(form_id)
-		.then(function (result) {
+exports.sendResponsePage = function(req, res, next) {
+	res.render('response', { 
+		id: req.params.id, 
+		response_id: req.response.id
+	});
+}
+
+
+exports.sendResponsesPage = function(req, res, next) {
+	res.render('responses', { id: req.params.id });
+};
+
+
+exports.toCSV = function (req, res, next) {
+	var report = [];
+	responses.findAll(req.form.id)
+		.then(result => {
 			if(result) {
-				data.form = result.form;
-				return responses.findAll(form_id);
-			} else {
-				next(new HttpError(404, 'Undefined form.'));
+				var form = req.form.json;
+				var allResponses = {
+					name : form.name,
+					// description : form.description,
+					head : form.questions.map(question => {
+							return question.title;
+						})
+				}
+
+				allResponses.body = result.map(responseRow => {
+					return allResponses.head.map(question => {
+						return responseRow.json[question];
+					}) 
+				})
+				console.log(allResponses);
+				var csv = json2csv.export(allResponses);
+				console.log(csv);
+				res.send(csv);
 			}
 		})
-		.then(function (result) {
+}
+
+
+exports.getOne = function(req, res, next) {
+	var response = {
+		author: req.response.json["Автор"],
+		received: req.response.received,
+		answers: req.response.json
+	}
+	res.send(response);
+}
+
+
+exports.getAll = function(req, res, next) {
+	var data = {};
+	data.form = forms.jsonForClient(req.form, true);
+
+	responses.findAll(req.form.id)
+		.then(result => {
 			if(result) {
-				data.responses = result.map(response => {
-					return response.answers;
-				})
+				data.responses = result.map(responses.jsonForClient);
 				res.json(data);
 			}
 		})
@@ -50,13 +85,9 @@ exports.getAll = function(req, res, next) {
 }
 
 
-exports.getOne = function(req, res, next) {
-	console.log('responses.getOne');
-}
 
-exports.sendResponsePage = function(req, res, next) {
-	res.render('response', { id: req.form.id, response_id: req.params.response_id });
-}
+
+
 
 
 // responses.find(5)

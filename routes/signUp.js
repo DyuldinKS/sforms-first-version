@@ -4,11 +4,6 @@ var path = require('path');
 var HttpError = require('../error').HttpError;
 
 exports.get = function (req, res, next) {
-	if(req.user) {
-		res.redirect('/');
-		// next(new HttpError(401, "Вы уже авторизованы"));
-		return;
-	}
 	res.render('signUp');
 };
 
@@ -26,7 +21,7 @@ exports.post = function (req, res, next) {
 		})
 		.then(function(result) {
 			if(result) {
-				req.session.user = users.encode(result.id);
+				req.session.user = users.getHash(result.id);
 				res.sendStatus(200);
 			}
 		})
