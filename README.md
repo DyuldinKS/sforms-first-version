@@ -1,5 +1,8 @@
 #Superforms
 -------
+
+Node.js web-app that allows to generate forms, send them, collect responses and export data to CSV.
+
 #Installation
 -------
 1. Install [Node.js](https://nodejs.org/en/) (version >= v5.2.0).
