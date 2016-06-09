@@ -6,23 +6,8 @@ module.exports = function(req, res, next) {
 		return next(new HttpError(404, 'Данная форма не найдена.'));
 
 	if(!req.response) 
-		return next(new HttpError(404, "Вы не авторизованы"));
+		return next(new HttpError(404, "Данный ответ не найден."));
 	
 	return (req.form.id !== req.response.form_id) ?
 		next(new HttpError(403, 'Нет доступа к данным.')) : next();
-	// var id = +req.params.response_id;
-	// responses.findOne(id)
-	// 	.then(result => {
-	// 		if(result) {
-	// 			if(result.form_id === req.form.id) {
-	// 				req.response = result;
-	// 				next();
-	// 			} else {
-	// 				next(new HttpError(403, 'Нет доступа к данным.'));
-	// 			}
-	// 		} else {
-	// 			next(new HttpError(404, 'Данный ответ не найден.'));
-	// 		}
-	// 	})
-	// 	["catch"](next);
 };

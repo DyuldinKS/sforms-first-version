@@ -1,7 +1,7 @@
 var config = require('../config');
 var forms = require('../models/form');
 var HttpError = require('../error').HttpError;
-
+var conversion = require('../lib/conversion');
 
 
 exports.sendGeneratorPage = function (req, res) {
@@ -27,17 +27,7 @@ exports.sendPreviewPage = function(req, res, next) {
 
 
 exports.sendInterviewPage = function(req, res, next) {
-	var id = forms.getID(req);
-	forms.findOne(id)
-		.then(result => {
-			if(result) {
-				res.render('interview', { id: req.params.id });
-			} else {
-				next(new HttpError(404, 'Данная форма не найдена.'));
-			}
-		})
-		['catch'](next);
-	
+	res.render('interview', { id: req.params.id });
 }
 
 
@@ -56,7 +46,7 @@ exports.update = function(req, res, next) {
 		json : req.body
 	} 
 	// Если форма сохраняется в процессе создания, то дата изменения не записывается в базу
-	// Используется для возмодности сортировки по созданным / отредактированным / отправленным формам
+	// Используется для возможности сортировки по созданным / отредактированным / отправленным формам
 	if ( req.headers.referer !== config.get('domain') + 'forms/new' ) {
 		updatedFields.edited = 'current_timestamp';
 	}
@@ -105,11 +95,14 @@ exports.delete = function(req, res, next) {
 
 exports.send = function(req, res, next) {
 	var id = req.form.id;
-	var updatedFields = {
-		sent : true
-	} 
-	if(req.body) {
-		// отправка почтой
+	
+	var updatedFields = JSON.parse(req.body);
+	updatedFields.sent = true;
+	delete(updatedFields.id);
+
+	if(updatedFields.recipients) {
+		// отправка почтой не работает
+		return next(new HttpError(500, 'Отправка почтой не поддерживается в данный момент. Пожалуйста, воспользуйтесь отправкой по ссылке.'));
 	}
 	// изменение статуса
 	forms.update(id, updatedFields)
@@ -121,7 +114,7 @@ exports.send = function(req, res, next) {
 
 
 exports.getOne = function(req, res, next) {
-	res.json(forms.jsonForClient(req.form, true));
+	res.json(new forms.JsonForClient(req.form, true));
 }
 
 
@@ -129,7 +122,11 @@ exports.getAll = function(req, res, next) {
 	forms.findAll(req.user.id)
 		.then(result => {
 			if(result) {
-				var formsList = result.map(forms.jsonForClient);
+				var formsList = [], i;
+				
+				for(i = 0; i < result.length; i++) {
+					formsList[i] = new forms.JsonForClient( result[i] );
+				}
 				res.json(formsList);
 			} else {
 				next(new HttpError(404, 'Данная форма не найдена.'));

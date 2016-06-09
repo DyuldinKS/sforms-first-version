@@ -2,7 +2,7 @@
 	"port" : 3000,
 	"domain" : "http://localhost:3000/",
 	"pg" : {
-		"url" : "postgres://username:password@localhost:5432/db_name",
+		"url" : "postgres://username:password@localhost:port/database_name",
 		"poolIdleTimeout" : 30000
 	},
 	"session" : {

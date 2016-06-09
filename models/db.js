@@ -45,11 +45,12 @@ query('\
 		created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,\
 		edited TIMESTAMP WITH TIME ZONE,\
 		sent TIMESTAMP WITH TIME ZONE,\
-		expires TIMESTAMP WITH TIME ZONE\
+		expires BOOLEAN DEFAULT current_timestamp FALSE,\
+		expiredate TIMESTAMP WITH TIME ZONE,\
+		allowrefill BOOLEAN DEFAULT FALSE\
 	);\
 	CREATE TABLE IF NOT EXISTS responses(\
 		id SERIAL PRIMARY KEY,\
-		user_id SERIAL REFERENCES users ON DELETE CASCADE,\
 		form_id SERIAL REFERENCES forms ON DELETE CASCADE,\
 		json JSON NOT NULL,\
 		received TIMESTAMP(6) WITH TIME ZONE DEFAULT current_timestamp\

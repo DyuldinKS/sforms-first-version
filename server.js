@@ -8,7 +8,7 @@ var db = require(__dirname + '/models/db')
 var session = require('express-session')
 var pgSession = require('connect-pg-simple')(session);
 var HttpError = require(__dirname + '/error').HttpError;
-
+// var morgan = require('morgan')
 var app = express();
 
 
@@ -35,22 +35,29 @@ app.use(session({
   saveUninitialized : config.get('session:saveUninitialized')
 }));
 
-
-// app.use(require('./middleware/loadUser'));
-// app.use(require('./middleware/loadData'));
-
 require(__dirname + '/routes')(app);
+
+
+// if (process.env.NODE_ENV === 'development') {
+//   // only use in development
+//   app.use(errorhandler())
+// }
+
+// app.use(morgan('combined'))
 
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use(function (err, req, res, send) {
-  console.log('ErrorHandler: ', err.stack);
   if(typeof(err) === 'number') {
     err = new HttpError(err);
-  } 
+  }
+  console.log(err.stack); 
   if(err instanceof HttpError) {
     res.sendHttpError(err);
   } else {
+    if(app.get('env') === 'development') {
+      // app.use(errorhandler());
+    }
     res.sendHttpError(new HttpError(500));
   }
   

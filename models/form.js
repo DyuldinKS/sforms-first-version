@@ -57,7 +57,7 @@ exports.getID = function (params) {
 }
 
 
-function JsonForClient(formRow, withQuestions) {
+exports.JsonForClient = function (formRow, withQuestions) {
 	this.id = hashids.encode(formRow.id);
 	this.name = formRow.json.name;
 	this.description = formRow.json.description;
@@ -66,13 +66,9 @@ function JsonForClient(formRow, withQuestions) {
 	this.edited = formRow.edited;
 	this.sent = formRow.sent;
 	this.expires = formRow.expires;
+	this.expireDate = formRow.expiredate;
+	this.allowRefill = formRow.allowrefill;
 	if(withQuestions) {
 		this.questions = formRow.json.questions;
 	}
-}
-
-// Создание объекта формы из строки таблицы 'forms'
-// для отправки списка всех форм
-exports.jsonForClient = function (formRow, withQuestions) {
-	return new JsonForClient(formRow, withQuestions);
 }
