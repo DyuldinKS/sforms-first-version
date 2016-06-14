@@ -21,7 +21,7 @@ exports.calculateField =  function (responsesArray, field) {
 			};
 			var ranking = {};
 			responsesArray.forEach(responseRow => {
-				var answer = responseRow.json[i];
+				var answer = responseRow.json[question];
 				ranking[ answer ] = (answer in ranking)? ranking[answer] + 1 : 1;
  			})
  			for(var key in ranking) {
@@ -31,24 +31,24 @@ exports.calculateField =  function (responsesArray, field) {
  			return result;
 
 		case 'SUM':
-			return rounding( responsesArray.reduce((sum, responseRow, i) => {
-				return sum + +responseRow.json[i];
+			return rounding( responsesArray.reduce((sum, responseRow) => {
+				return sum + +responseRow.json[question];
 			}, 0), precision);
 
 		case 'AVERAGE':
-			return rounding( responsesArray.reduce((sum, responseRow, i) => {
-				return sum + +responseRow.json[i];
+			return rounding( responsesArray.reduce((sum, responseRow) => {
+				return sum + +responseRow.json[question];
 			}, 0) / responsesArray.length, precision);
 
 		case 'MIN':
-			return rounding( responsesArray.reduce((min, responseRow, i) => {
-				return (min > +responseRow.json[i]) ? +responseRow.json[i] : min;
-			}, responsesArray[0].json[i]), precision);
+			return rounding( responsesArray.reduce((min, responseRow) => {
+				return (min > +responseRow.json[question]) ? +responseRow.json[question] : min;
+			}, responsesArray[0].json[question]), precision);
 
 		case 'MAX':
-			return rounding( responsesArray.reduce((max, responseRow, i) => {
-				return (max < +responseRow.json[i]) ? +responseRow.json[i] : max;
-			}, responsesArray[0].json[i]), precision);
+			return rounding( responsesArray.reduce((max, responseRow) => {
+				return (max < +responseRow.json[question]) ? +responseRow.json[question] : max;
+			}, responsesArray[0].json[question]), precision);
 		}
 }
 

@@ -30,7 +30,7 @@ module.exports = function (app) {
   app.get('/forms/:id/reports', loadData, checkFormByAuthor, reports.getAllByForm);//get all reports by form id
 
 
-  app.get('/signin', checkNotAuth, users.sendSignInUpPage);
+  app.get('/user', checkNotAuth, users.sendSignInUpPage);
   app.post('/signin', checkNotAuth, users.signIn);
   app.post('/signup', checkNotAuth, users.signUp);
   app.get('/signout', users.signOut);

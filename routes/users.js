@@ -49,9 +49,9 @@ exports.signUp = function (req, res, next) {
 exports.signOut = function (req, res) {
 	if(req.session)
 		req.session.destroy(function(err) {
-	  	res.redirect('/signin');
+	  	res.redirect('/user#signin');
 		})
 	else
-		res.redirect('/signin');
+		res.redirect('/user#signin');
 	
 };

@@ -1,7 +1,6 @@
 var config = require('../config');
 var forms = require('../models/form');
 var HttpError = require('../error').HttpError;
-var conversion = require('../lib/conversion');
 
 
 exports.sendGeneratorPage = function (req, res) {

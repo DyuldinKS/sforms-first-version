@@ -12,7 +12,6 @@ var models = {
 
 
 module.exports = function(req, res, next) {
-	console.log(req.url)
 	var queries = [];
 	var modelsNames = [];
 	determineQueriesAndModels(req, queries, modelsNames);

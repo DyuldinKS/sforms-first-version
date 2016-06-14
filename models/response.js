@@ -28,16 +28,23 @@ exports.getHash = function (id) {
 }
 
 
-exports.JsonForClient = function JsonForClient(questions, responseRow) {
-	var i = 0, 
-			self = this;
-
+exports.JsonForClient = function JsonForClient(responseRow) {
 	this.id = hashids.encode(responseRow.id);
- 	this['Автор'] = responseRow.json[i++];
- 	questions.forEach(question => {
- 		self[question.title] = responseRow.json[i++];
- 	})
+	this.author = responseRow.json["Автор"];
+	this.received = responseRow.received;
+	this.answers = responseRow.json;
 }
+
+// exports.JsonForClient = function JsonForClient(questions, responseRow) {
+// 	var i = 0, 
+// 			self = this;
+
+// 	this.id = hashids.encode(responseRow.id);
+//  	this['Автор'] = responseRow.json[i++];
+//  	questions.forEach(question => {
+//  		self[question.title] = responseRow.json[i++];
+//  	})
+// }
 
 exports.jsonForClient = function (questions, responseRow) {
 	// responseRow.json.id = hashids.encode(responseRow.id);

@@ -2,7 +2,7 @@ var forms = require('../models/form');
 var responses = require('../models/response');
 var reports = require('../models/report');
 var HttpError = require('../error').HttpError;
-var conversion = require('../lib/conversion');
+var conversion = require('../libs/conversion');
 
 
 
@@ -11,7 +11,6 @@ exports.getAllByForm = function (req, res, next) {
 }
 
 exports.save = function (req, res, next) {
-	return next(new HttpError(403, 'Создание отчета недоступно в данный момент.'))
 	var order = (JSON.parse(req.body)).columns;
 	var report = [];
 	responses.findAll(req.form.id)

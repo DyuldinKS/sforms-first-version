@@ -5,6 +5,6 @@ exports.get = function (req, res, next) {
 		res.render('main');
 		// res.sendFile(path.join(__dirname, '../public/views/main.html'));
 	} else {
-		res.redirect('/signin');
+		res.redirect('/user#signin');
 	}
 };
